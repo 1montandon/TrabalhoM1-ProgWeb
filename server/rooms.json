@@ -1,0 +1,68 @@
+[
+  {
+    "id": "8CA622CC-280E-4B13-AEB2-33CA8601A74D",
+    "name": "Lab 101",
+    "building": "Bloco A",
+    "capacity": 10,
+    "resources": [
+      "Projetor",
+      "Ar-condicionado",
+      "Quadro branco"
+    ]
+  },
+  {
+    "id": "0DC06EA4-E832-4B34-84EA-F623F695F0AE",
+    "name": "Lab 102",
+    "building": "Bloco B",
+    "capacity": 20,
+    "resources": [
+      "Projetor",
+      "Ar-condicionado",
+      "Quadro branco"
+    ]
+  },
+  {
+    "id": "F8784EC6-73CF-4146-BC6B-A28F2EC49588",
+    "name": "Lab 103",
+    "building": "Bloco C",
+    "capacity": 30,
+    "resources": [
+      "Projetor",
+      "Ar-condicionado",
+      "Quadro branco"
+    ]
+  },
+  {
+    "id": "06D26995-3FA3-4CBC-BB75-43FCFD89A8A1",
+    "name": "Lab 104",
+    "building": "Bloco A",
+    "capacity": 40,
+    "resources": [
+      "Projetor",
+      "Ar-condicionado",
+      "Quadro branco"
+    ]
+  },
+  {
+    "id": 1,
+    "name": "Lab 110",
+    "building": "Bloco Z",
+    "capacity": 90,
+    "resources": [
+      "Projetor",
+      "Ar-condicionado",
+      "Quadro branco"
+    ]
+  },
+  {
+    "id": "eaa9d495-f797-4272-aa28-6e24df1f3fd2",
+    "name": "Lab 111",
+    "building": "Bloco Z",
+    "capacity": 90,
+    "resources": [
+      "Projetor",
+      "Ar-condicionado",
+      "Quadro branco"
+    ]
+  }
+]
