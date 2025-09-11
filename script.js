@@ -98,7 +98,7 @@
         // filtro por funcionalidades (recursos) — verifica se o array inclui
         if (
           filtros.funcionalidades &&
-          !recursos.includes(filtros.funcionalidades)
+          !sala.resources.includes(filtros.funcionalidades)
         ) {
           return false;
         }
