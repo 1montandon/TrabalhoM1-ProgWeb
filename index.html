@@ -18,9 +18,127 @@
     <h1 class="fs-1 fw-bold text-center my-4">Reservas de Salas</h1>
 
     <!-- Container principal -->
-    <div class="container vh-100">
+    <div class="container vh-100 d-grid row-gap-3">
       <div class="row h-75">
         <div class="col">
+          <!-- Modal -->
+          <div
+            class="modal fade"
+            id="modalCriarSala"
+            data-bs-backdrop="static"
+            data-bs-keyboard="false"
+            tabindex="-1"
+            aria-labelledby="staticBackdropLabel"
+            aria-hidden="true"
+          >
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h1 class="modal-title fs-5" id="staticBackdropLabel">
+                    Criar Sala
+                  </h1>
+                  <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"
+                  ></button>
+                </div>
+                <div class="modal-body">
+                  <form id="criarSalaForm">
+                    <div class="mb-3">
+                      <label for="nomeCriarSala" class="form-label">Nome Sala</label>
+                      <input type="text" class="form-control" id="nomeCriarSala" />
+                    </div>
+                    <div class="mb-3">
+                      <label for="blocoSala" class="form-label"
+                        >Predio Sala</label
+                      >
+                      <select id="blocoSala" class="form-control"></select>
+                    </div>
+                    <div class="mb-3">
+                      <label for="funcionalidadesSala" class="form-label"
+                        >Funcionalidades Sala</label
+                      >
+                      <select id="funcionalidadesSala" class="form-control"></select>
+                    </div>
+                    <div class="mb-3">
+                      <label for="capacidadeSala" class="form-label"
+                        >Capacidade Sala</label
+                      >
+                      <input id="capacidadeSala" type="number" class="form-control">
+                    </input>
+                    </div>
+                  </form>
+                </div>
+                <div class="modal-footer">
+
+                  <button type="button" class="btn btn-primary" id="criarsala">Criar</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+                    <!-- Modal -->
+          <div
+            class="modal fade"
+            id="modalEditarSala"
+            data-bs-backdrop="static"
+            data-bs-keyboard="false"
+            tabindex="-1"
+            aria-labelledby="staticBackdropLabel"
+            aria-hidden="true"
+          >
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h1 class="modal-title fs-5" id="staticBackdropLabel">
+                    Editar Sala
+                  </h1>
+                  <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"
+                  ></button>
+                </div>
+                <div class="modal-body">
+                  <form id="editarSalaForm">
+                    <div class="mb-3">
+                      <label for="nomeEditarSala" class="form-label">Nome Sala</label>
+                      <input type="text" class="form-control" id="nomeEditarSala" />
+                    </div>
+                    <div class="mb-3">
+                      <label for="blocoEditarSala" class="form-label"
+                        >Predio Sala</label
+                      >
+                      <select id="blocoEditarSala" class="form-control"></select>
+                    </div>
+                    <div class="mb-3">
+                      <label for="funcionalidadesEditarSala" class="form-label"
+                        >Funcionalidades Sala</label
+                      >
+                      <select id="funcionalidadesEditarSala" class="form-control"></select>
+                    </div>
+                    <div class="mb-3">
+                      <label for="capacidadeEditarSala" class="form-label"
+                        >Capacidade Sala</label
+                      >
+                      <input id="capacidadeEditarSala" type="number" class="form-control">
+                    </input>
+                    </div>
+                  </form>
+                </div>
+                <div class="modal-footer">
+
+                  <button type="button" class="btn btn-primary" id="editarsala">Editar</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+          FORM
           <h2>Salas</h2>
           <form class="h-100 d-flex gap-2 flex-column" id="salasForm">
             <div class="d-flex gap-2">
@@ -40,6 +158,7 @@
               </select>
               <input
                 type="number"
+                id="capacity"
                 style="width: 20%"
                 class="form-control"
                 placeholder="capacidade"
@@ -51,8 +170,16 @@
                 class="form-select"
                 style="width: 30%"
               >
-
+                <option value="" selected>Recursos</option>
               </select>
+              <button
+                type="button"
+                class="btn btn-primary"
+                data-bs-toggle="modal"
+                data-bs-target="#modalCriarSala"
+              >
+                Criar Sala
+              </button>
             </div>
             <div class="d-flex gap-2 h-100">
               <div
@@ -63,7 +190,50 @@
           </form>
         </div>
       </div>
+      <div class="row">
+            <div
+      id="formReserva"
+      style="display: none"
+      class="bg-light p-3 border mt-3"
+    >
+      <h3>Nova Reserva</h3>
+      <form id="reservaForm">
+        <div class="mb-2">
+          <label for="titulo" class="form-label">Título</label>
+          <input type="text" id="titulo" class="form-control" required />
+        </div>
+        <div class="mb-2">
+          <label for="inicio" class="form-label">Início</label>
+          <input
+            type="datetime-local"
+            id="inicio"
+            class="form-control"
+            required
+          />
+        </div>
+        <div class="mb-2">
+          <label for="fim" class="form-label">Fim</label>
+          <input type="datetime-local" id="fim" class="form-control" required />
+        </div>
+        <div class="mb-2">
+          <label for="solicitante" class="form-label">Solicitante</label>
+          <input type="text" id="solicitante" class="form-control" required />
+        </div>
+        <div class="mb-2">
+          <label for="salaSelecionada" class="form-label">Sala</label>
+          <input
+            type="text"
+            id="salaSelecionada"
+            class="form-control"
+            readonly
+          />
+        </div>
+        <button type="submit" class="btn btn-success">Confirmar Reserva</button>
+      </form>
     </div>
+      </div>
+    </div>
+
     <script src="script.js"></script>
     <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"

@@ -42,8 +42,21 @@
   const salasDiv = document.querySelector("#salas");
   const salasForm = document.querySelector("#salasForm");
   const selectBlocos = document.querySelector("#blocos");
+  const selectcapacity = document.querySelector("#capacity");
   const selectFuncionalidades = document.querySelector("#funcionalidades");
-
+  const botaoCriarSala = document.querySelector("#criarsala");
+  const selectBlocosCriar = document.querySelector("#blocoSala");
+  const selectFuncionalidadesCriar = document.querySelector(
+    "#funcionalidadesSala"
+  );
+  const nomeCriarSala = document.querySelector("#nomeCriarSala");
+  const capacidadeCriarSala = document.querySelector("#capacidadeSala");
+  const selectBlocosEditar = document.querySelector("#blocoEditarSala");
+  const selectFuncionalidadesEditar = document.querySelector(
+    "#funcionalidadesEditarSala"
+  );
+  const botaoEditarSala = document.querySelector("#editarsala");
+  let salaEditarId;
   // Quando o formulário de filtros for enviado, vamos montar um objeto
   // `filtros` com os valores escolhidos e chamar `buscarSalas`.
   salasForm.addEventListener("submit", (event) => {
@@ -66,6 +79,10 @@
       filtros.funcionalidades = selectFuncionalidades.value;
     }
 
+    if (selectcapacity.value != "") {
+      filtros.capacity = Number(selectcapacity.value); // pega o número
+    }
+
     buscarSalas(filtros);
   });
 
@@ -80,8 +97,6 @@
     // renderizamos todas as salas.
     if (filtros) {
       const salasFiltradas = arraySalas.filter((sala) => {
- 
-
         // filtro por bloco (building)
         if (filtros.blocos && sala.building !== filtros.blocos) {
           return false;
@@ -102,24 +117,77 @@
         ) {
           return false;
         }
+        if (filtros.capacity && sala.capacity > Number(filtros.capacity)) {
+          return false;
+        }
 
         return true;
       });
 
       // Renderiza cada sala filtrada criando um elemento `div`
       salasFiltradas.forEach((sala) => {
-        const salaDiv = document.createElement("div");
-        salaDiv.classList.add("h-25", "bg-secondary");
-        salaDiv.textContent = sala.name + " - " + sala.building;
-        salasDiv.appendChild(salaDiv);
-      });
-    } else {
-      // Se não houver filtros, renderiza todas as salas
-      arraySalas.forEach((sala) => {
-        const salaDiv = document.createElement("div");
-        salaDiv.classList.add("h-25", "bg-secondary");
-        salaDiv.textContent = sala.name + " - " + sala.building;
-        salasDiv.appendChild(salaDiv);
+        const salaContainer = document.createElement("div");
+        salaContainer.classList.add(
+          "d-flex",
+          "justify-content-between",
+          "align-items-center",
+          "bg-secondary",
+          "p-2",
+          "mb-2",
+          "text-white"
+        );
+
+        // Informações da sala
+        const salaInfo = document.createElement("span");
+        salaInfo.textContent =
+          sala.name +
+          " - " +
+          sala.building +
+          " - " +
+          sala.capacity +
+          " - " +
+          sala.resources;
+
+        // Botão Editar
+        const btnEditar = document.createElement("button");
+        btnEditar.textContent = "Editar";
+        btnEditar.id = "botaoEditarSala";
+        btnEditar.type = "button";
+        btnEditar.setAttribute("data-bs-toggle", "modal");
+        btnEditar.setAttribute("data-bs-target", "#modalEditarSala");
+        btnEditar.classList.add("btn", "btn-warning");
+        // Passa a sala como argumento para a função do modal
+        btnEditar.addEventListener("click", function () {
+          adicionarInfoNoModal(sala);
+        });
+
+        const btnreservar = document.createElement("button");
+        btnreservar.textContent = "reservar";
+        btnreservar.classList.add("btn", "btn-warning");
+
+        const btnremover = document.createElement("button");
+        btnremover.textContent = "remover";
+        btnremover.classList.add("btn", "btn-warning");
+        btnremover.type = 'button'
+        btnremover.addEventListener("click", function() {
+          deleteSala(sala)
+        })
+
+        btnreservar.addEventListener("click", () => {
+          const formReserva = document.querySelector("#formReserva");
+          formReserva.style.display = "block"; // mostra o formulário
+          document.querySelector("#salaSelecionada").value =
+            sala.name + " - " + sala.building;
+        });
+
+        // Coloca o texto e o botão dentro do container
+        salaContainer.appendChild(salaInfo);
+        salaContainer.appendChild(btnreservar);
+        salaContainer.appendChild(btnremover);
+        salaContainer.appendChild(btnEditar);
+
+        // Adiciona o container completo à div principal
+        salasDiv.appendChild(salaContainer);
       });
     }
   }
@@ -131,21 +199,122 @@
       const blocoOption = document.createElement("option");
       blocoOption.value = bloco;
       blocoOption.textContent = bloco;
+      const blocoOptionCriar = document.createElement("option");
+      blocoOptionCriar.value = bloco;
+      blocoOptionCriar.textContent = bloco;
       selectBlocos.appendChild(blocoOption);
+      selectBlocosCriar.appendChild(blocoOptionCriar);
     });
   }
   criarOptionsBlocos();
 
   // Preenche o select de funcionalidades (resources) sem repetir valores
   function criarOptionsFuncionalidades() {
-    const funcionalidadesArray = arraySalas.flatMap((sala) => sala.resources || []);
+    const funcionalidadesArray = arraySalas.flatMap(
+      (sala) => sala.resources || []
+    );
     const setFuncionalidades = new Set(funcionalidadesArray);
     setFuncionalidades.forEach((funcionalidade) => {
       const funcionalidadesOption = document.createElement("option");
       funcionalidadesOption.value = funcionalidade;
       funcionalidadesOption.textContent = funcionalidade;
+      const funcionalidadesOptionCriar = document.createElement("option");
+      funcionalidadesOptionCriar.value = funcionalidade;
+      funcionalidadesOptionCriar.textContent = funcionalidade;
+
       selectFuncionalidades.appendChild(funcionalidadesOption);
+      selectFuncionalidadesCriar.appendChild(funcionalidadesOptionCriar);
     });
   }
   criarOptionsFuncionalidades();
+
+  botaoCriarSala.addEventListener("click", async () => {
+    console.log(capacidadeCriarSala);
+    const body = {
+      name: nomeCriarSala.value,
+      building: selectBlocosCriar.value,
+      capacity: Number(capacidadeCriarSala.value),
+      resources: [selectFuncionalidadesCriar.value],
+    };
+
+    console.log(JSON.stringify(body));
+    const response = await fetch(
+      "https://sistema-de-reservas-node-js-express.onrender.com/api/rooms",
+      {
+        method: "POST",
+        body: JSON.stringify(body),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    console.log(response);
+  });
+
+  function adicionarInfoNoModal(sala) {
+    salaEditarId = sala.id;
+    const setBlocos = new Set(arraySalas.map((sala) => sala.building));
+    setBlocos.forEach((bloco) => {
+      const blocoOptionEditar = document.createElement("option");
+      blocoOptionEditar.value = bloco;
+      blocoOptionEditar.textContent = bloco;
+      selectBlocosEditar.appendChild(blocoOptionEditar);
+    });
+
+    const funcionalidadesArray = arraySalas.flatMap(
+      (sala) => sala.resources || []
+    );
+    const setFuncionalidades = new Set(funcionalidadesArray);
+    setFuncionalidades.forEach((funcionalidade) => {
+      const funcionalidadesOption = document.createElement("option");
+      funcionalidadesOption.value = funcionalidade;
+      funcionalidadesOption.textContent = funcionalidade;
+      selectFuncionalidadesEditar.appendChild(funcionalidadesOption);
+    });
+
+    console.log(sala);
+    // Preenche os campos do modal com os dados da sala
+    document.querySelector("#nomeEditarSala").value = sala.name;
+    document.querySelector("#capacidadeEditarSala").value = sala.capacity;
+    document.querySelector("#blocoEditarSala").value = sala.building;
+    // Se houver funcionalidades, pega a primeira (ou adapte para múltiplas)
+    if (sala.resources && sala.resources.length > 0) {
+      document.querySelector("#funcionalidadesEditarSala").value =
+        sala.resources[0];
+    } else {
+      document.querySelector("#funcionalidadesEditarSala").value = "";
+    }
+  }
+  botaoEditarSala.addEventListener("click", async () => {
+    const body = {
+      name: document.querySelector("#nomeEditarSala").value,
+      building: document.querySelector("#blocoEditarSala").value,
+      capacity: Number(document.querySelector("#capacidadeEditarSala").value),
+      resources: [selectFuncionalidadesCriar.value],
+    };
+
+    console.log(JSON.stringify(body));
+    const response = await fetch(
+      `https://sistema-de-reservas-node-js-express.onrender.com/api/rooms/${salaEditarId}`,
+      {
+        method: "PUT",
+        body: JSON.stringify(body),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    buscarSalas();
+    console.log(response);
+  });
+
+  async function deleteSala(sala){
+    await fetch(
+      `https://sistema-de-reservas-node-js-express.onrender.com/api/rooms/${sala.id}`,
+      {
+        method: "DELETE",
+      }
+    );
+    buscarSalas();
+  }
 })();
