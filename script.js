@@ -34,7 +34,7 @@
 
   // Faz a requisição para a API e transforma a resposta em JSON.
   // Atribuímos o resultado à `arraySalas` (array de objetos de sala).
-  const arraySalas = await fetch(
+  let arraySalas = await fetch(
     "https://sistema-de-reservas-node-js-express.onrender.com/api/rooms"
   ).then((res) => res.json());
 
@@ -88,7 +88,10 @@
 
   // Função que recebe um objeto `filtros` e exibe apenas as salas que
   // correspondem aos critérios. Se `filtros` for vazio, exibe todas.
-  function buscarSalas(filtros) {
+  async function buscarSalas(filtros) {
+    arraySalas = await fetch(
+      "https://sistema-de-reservas-node-js-express.onrender.com/api/rooms"
+    ).then((res) => res.json());
     console.log(filtros);
     // Limpa o conteúdo atual antes de renderizar os resultados
     salasDiv.innerHTML = "";
@@ -168,16 +171,79 @@
         const btnremover = document.createElement("button");
         btnremover.textContent = "remover";
         btnremover.classList.add("btn", "btn-warning");
-        btnremover.type = 'button'
-        btnremover.addEventListener("click", function() {
-          deleteSala(sala)
-        })
+        btnremover.type = "button";
+        btnremover.addEventListener("click", function () {
+          deleteSala(sala);
+        });
 
         btnreservar.addEventListener("click", () => {
           const formReserva = document.querySelector("#formReserva");
           formReserva.style.display = "block"; // mostra o formulário
-          document.querySelector("#salaSelecionada").value =
-            sala.name + " - " + sala.building;
+          document.querySelector("#salaSelecionada").value = sala.name;
+        });
+
+        // Coloca o texto e o botão dentro do container
+        salaContainer.appendChild(salaInfo);
+        salaContainer.appendChild(btnreservar);
+        salaContainer.appendChild(btnremover);
+        salaContainer.appendChild(btnEditar);
+
+        // Adiciona o container completo à div principal
+        salasDiv.appendChild(salaContainer);
+      });
+    } else {
+      arraySalas.forEach((sala) => {
+        const salaContainer = document.createElement("div");
+        salaContainer.classList.add(
+          "d-flex",
+          "justify-content-between",
+          "align-items-center",
+          "bg-secondary",
+          "p-2",
+          "mb-2",
+          "text-white"
+        );
+
+        // Informações da sala
+        const salaInfo = document.createElement("span");
+        salaInfo.textContent =
+          sala.name +
+          " - " +
+          sala.building +
+          " - " +
+          sala.capacity +
+          " - " +
+          sala.resources;
+
+        // Botão Editar
+        const btnEditar = document.createElement("button");
+        btnEditar.textContent = "Editar";
+        btnEditar.id = "botaoEditarSala";
+        btnEditar.type = "button";
+        btnEditar.setAttribute("data-bs-toggle", "modal");
+        btnEditar.setAttribute("data-bs-target", "#modalEditarSala");
+        btnEditar.classList.add("btn", "btn-warning");
+        // Passa a sala como argumento para a função do modal
+        btnEditar.addEventListener("click", function () {
+          adicionarInfoNoModal(sala);
+        });
+
+        const btnreservar = document.createElement("button");
+        btnreservar.textContent = "reservar";
+        btnreservar.classList.add("btn", "btn-warning");
+
+        const btnremover = document.createElement("button");
+        btnremover.textContent = "remover";
+        btnremover.classList.add("btn", "btn-warning");
+        btnremover.type = "button";
+        btnremover.addEventListener("click", function () {
+          deleteSala(sala);
+        });
+
+        btnreservar.addEventListener("click", () => {
+          const formReserva = document.querySelector("#formReserva");
+          formReserva.style.display = "block"; // mostra o formulário
+          document.querySelector("#salaSelecionada").value = sala.name;
         });
 
         // Coloca o texto e o botão dentro do container
@@ -285,6 +351,7 @@
       document.querySelector("#funcionalidadesEditarSala").value = "";
     }
   }
+
   botaoEditarSala.addEventListener("click", async () => {
     const body = {
       name: document.querySelector("#nomeEditarSala").value,
@@ -308,7 +375,7 @@
     console.log(response);
   });
 
-  async function deleteSala(sala){
+  async function deleteSala(sala) {
     await fetch(
       `https://sistema-de-reservas-node-js-express.onrender.com/api/rooms/${sala.id}`,
       {
@@ -316,5 +383,141 @@
       }
     );
     buscarSalas();
+  }
+
+  const criarReservaForm = document.querySelector("#criarReservaForm");
+
+  criarReservaForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    console.log(event.target);
+
+    const startInput = event.target.querySelector("#inicio").value;
+    const startDate = new Date(startInput);
+    const isoStart = startDate.toISOString();
+
+    const endInput = event.target.querySelector("#fim").value;
+    const endDate = new Date(endInput);
+    const isoEnd = endDate.toISOString();
+
+    console.log(arraySalas);
+    console.log(event.target.querySelector("#salaSelecionada"));
+    const room = arraySalas.find(
+      (sala) =>
+        sala.name === event.target.querySelector("#salaSelecionada").value
+    );
+
+    console.log(room);
+
+    const body = {
+      roomId: room?.id, // agora pega só o id
+      title: event.target.querySelector("#titulo").value,
+      start: isoStart,
+      end: isoEnd,
+      requester: event.target.querySelector("#solicitante").value,
+    };
+
+    console.log(body);
+    const response = await fetch(
+      "https://sistema-de-reservas-node-js-express.onrender.com/api/reservations",
+      {
+        method: "POST",
+        body: JSON.stringify(body),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    console.log(response);
+    buscarReservas({})
+  });
+
+  // reservas
+  let arrayReservas = await fetch(
+    "https://sistema-de-reservas-node-js-express.onrender.com/api/reservations"
+  ).then((res) => res.json());
+
+  console.log(arrayReservas);
+
+  const reservaForm = document.querySelector("#reservaForm");
+  const reservasDiv = document.querySelector("#reservas"); // precisa ter id="reservas" no HTML
+  const inputReservante = document.querySelector("#reservante");
+
+  // evento de pesquisa
+  reservaForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+
+    let filtros = {};
+
+    if (inputReservante.value != "") {
+      filtros.reservante = inputReservante.value;
+    }
+
+    buscarReservas(filtros);
+  });
+
+  // renderizar reservas
+  async function buscarReservas(filtros) {
+    arrayReservas = await fetch(
+      "https://sistema-de-reservas-node-js-express.onrender.com/api/reservations"
+    ).then((res) => res.json());
+    console.log("Filtros reservas:", filtros);
+    reservasDiv.innerHTML = "";
+
+    const reservasFiltradas = arrayReservas.filter((reserva) => {
+      // filtro por nome do solicitante (case insensitive)
+      if (
+        filtros.reservante &&
+        !reserva.requester
+          .toLowerCase()
+          .includes(filtros.reservante.toLowerCase())
+      ) {
+        return false;
+      }
+      return true;
+    });
+
+    reservasFiltradas.forEach((reserva) => {
+      const reservaContainer = document.createElement("div");
+      reservaContainer.classList.add(
+        "d-flex",
+        "justify-content-between",
+        "align-items-center",
+        "bg-secondary",
+        "p-2",
+        "mb-2",
+        "text-white"
+      );
+
+      // converter datas ISO → formato legível
+      const inicio = new Date(reserva.start).toLocaleString("pt-BR");
+      const fim = new Date(reserva.end).toLocaleString("pt-BR");
+
+      // informações da reserva
+      const reservaInfo = document.createElement("span");
+      reservaInfo.textContent = `${reserva.title} | Sala: ${reserva.roomId} | ${inicio} → ${fim} | Reservado por: ${reserva.requester}`;
+
+      // botão remover
+      const btnRemover = document.createElement("button");
+      btnRemover.textContent = "Remover";
+      btnRemover.classList.add("btn", "btn-warning");
+      btnRemover.addEventListener("click", () => {
+        deleteReserva(reserva);
+      });
+
+      reservaContainer.appendChild(reservaInfo);
+      reservaContainer.appendChild(btnRemover);
+
+      reservasDiv.appendChild(reservaContainer);
+    });
+  }
+  async function deleteReserva(reserva) {
+    console.log(reserva);
+    await fetch(
+      `https://sistema-de-reservas-node-js-express.onrender.com/api/reservations/${reserva.id}`,
+      {
+        method: "DELETE",
+      }
+    );
+    buscarReservas({});
   }
 })();
